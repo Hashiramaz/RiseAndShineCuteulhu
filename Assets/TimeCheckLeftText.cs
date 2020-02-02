@@ -25,7 +25,7 @@ public class TimeCheckLeftText : MonoBehaviour
         {
             _currentTimeLeft = GameEventSystem.GetCurrentTimeCheckLeft();
             
-            TimeLeftText.text =Mathf.Round(_currentTimeLeft).ToString();
+            TimeLeftText.text = Mathf.Round(_currentTimeLeft).ToString();
         }
     }
 }

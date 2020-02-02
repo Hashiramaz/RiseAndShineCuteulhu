@@ -10,6 +10,7 @@ public class GameEventSystem : MonoBehaviour
         public delegate float GameFloatValue();
         public delegate int GameIntValue();
         public delegate bool GameBoolValue();
+        public delegate string GameStringValue();
         public delegate GameState GameStateEvent();
 
         public delegate void GameSwapPieceEvent(int row, int collum, SwapDirection direction);
@@ -159,7 +160,38 @@ public class GameEventSystem : MonoBehaviour
 
         public static float GetCurrentLife(){
             if(onGetCurrentLife != null)
-                return GetCurrentLife();
+                return onGetCurrentLife();
+            else 
+                return 0f;
+        }
+        public static GameFloatValue onGetCurrentMaxLife;
+
+        public static float GetCurrentMaxLife(){
+            if(onGetCurrentMaxLife != null)
+                return GetCurrentMaxLife();
+            else 
+                return 0f;
+        }
+
+        public static GameStringValue onGetCurrentChannelName;
+        public static string GetCurrentChannelName(){
+            if(onGetCurrentChannelName != null)
+                return onGetCurrentChannelName();
+            else 
+                return "";
+        }
+        public static GameBoolValue onGetAutomaticRestart;
+        public static bool GetAutomaticRestart(){
+            if(onGetAutomaticRestart != null)
+                return onGetAutomaticRestart();
+            else 
+                return false;
+        }
+        public static GameFloatValue onGetCurrentTimeToRestartGame;
+
+        public static float GetCurrentTimeToRestartGame(){
+            if(onGetCurrentTimeToRestartGame != null)
+                return GetCurrentTimeToRestartGame();
             else 
                 return 0f;
         }

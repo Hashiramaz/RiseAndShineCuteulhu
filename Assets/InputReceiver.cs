@@ -10,6 +10,10 @@ public class InputReceiver : MonoBehaviour
 
     private void Update() 
     {
+
+        if(GameEventSystem.GetCurrentGameState() != GameState.INGAME)
+            return;
+
         if(Input.GetKeyDown(KeyCode.Alpha0))
         {
             SendSwapEvent(1,2,SwapDirection.RIGHT);
@@ -40,7 +44,7 @@ public class InputReceiver : MonoBehaviour
             SendCheckMatchEvent();
         }
         if(Input.GetKeyDown(KeyCode.D)){
-            GameEventSystem.FinishGame();
+            GameEventSystem.FinishGameVariant(true);
         }
     }
 

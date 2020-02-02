@@ -19,6 +19,8 @@ public class GameController : MonoBehaviour
     public int winCondition = 15;
 
     public int minPiecesToDestroy = 5;
+
+    public float currentTimeToRestartGame = 10f;
     private void OnEnable()
     {
         GameEventSystem.onAddScore += OnAddScore;
@@ -35,6 +37,11 @@ public class GameController : MonoBehaviour
         GameEventSystem.onCheckBarScore += OnCheckBarScore;
         GameEventSystem.onGetCurrentMinPiecesToDestroy += OnValue_CurrentMinPiecesToDestroy;
         GameEventSystem.onGameFinishVariant += OnFinishGameVariant;
+
+        GameEventSystem.onGetCurrentLife  += OnValue_CurrentLifeCount;
+        GameEventSystem.onGetCurrentMaxLife += OnValue_MaxLifeCount;
+        GameEventSystem.onGameReset += OnResetGame;
+        GameEventSystem.onGetCurrentTimeToRestartGame += OnValue_CurrentTimeToResetGame;
     }
 
     private void OnDisable()
@@ -52,10 +59,17 @@ public class GameController : MonoBehaviour
         GameEventSystem.onCheckBarScore -= OnCheckBarScore;
         GameEventSystem.onGetCurrentMinPiecesToDestroy -= OnValue_CurrentMinPiecesToDestroy;
         GameEventSystem.onGameFinishVariant -= OnFinishGameVariant;
+        
+        GameEventSystem.onGetCurrentLife  -= OnValue_CurrentLifeCount;
+        GameEventSystem.onGetCurrentMaxLife -= OnValue_MaxLifeCount;
+        GameEventSystem.onGameReset -= OnResetGame;
+        GameEventSystem.onGetCurrentTimeToRestartGame -= OnValue_CurrentTimeToResetGame;
     }
 
     private void Update()
     {
+      
+        UpdateTimeToResetGame();
 
       if(gameState != GameState.INGAME)
         return;
@@ -64,6 +78,27 @@ public class GameController : MonoBehaviour
 
         if (currentTimeleft < 0)
             StartCheckWait();
+        
+    }
+
+    public void UpdateTimeToResetGame(){
+      
+      if(gameState == GameState.INGAME)
+        return;
+
+      if(gameState == GameState.MENU)
+        return;
+      
+      if(gameState == GameState.PREPARING)
+        return;
+
+      if(!GameEventSystem.GetAutomaticRestart())
+        return;
+
+      currentTimeToRestartGame -= Time.deltaTime;
+
+      if(currentTimeToRestartGame <= 0)
+        GameEventSystem.ResetGame();
     }
 
     public void StartCheckWait()
@@ -112,13 +147,26 @@ public class GameController : MonoBehaviour
       {
         SetGamestate(GameState.FINALSCREENLOST);
       }
-    }
 
+      if(GameEventSystem.GetAutomaticRestart())
+        ResetTimeToRestartGame();
+    }
+    
     private void ReturnToMenu()
     {
        SetGamestate(GameState.MENU);
     }
     
+
+    public void ResetGame()
+    {
+      ResetScore();
+      ResetLife();
+      ResetMinPieces();
+      PrepareGameToStart();
+    }
+
+
     public void SetGamestate(GameState _state)
     {
         gameState = _state;
@@ -140,6 +188,11 @@ public class GameController : MonoBehaviour
 
     // }
 
+    public void ResetTimeToRestartGame()
+    {
+      currentTimeToRestartGame = 10;
+    }
+
     public void CheckMatchs()
     {
       Match3.MatchManager.instance.StartCheckMatchsRoutine();
@@ -152,12 +205,16 @@ public class GameController : MonoBehaviour
        GameEventSystem.GreatCombo();
         Debug.Log("MANDOU BEM!");
         AddPieceLevel();
+        AddLife();
+      //  CheckEndGame();
      }
       else{
         GameEventSystem.BadCombo();
         Debug.Log("MANDOU MAL =(");
+        RemoveLife();
       }
 
+      CheckEndGame();
     }
 
     public void AddPieceLevel()
@@ -172,15 +229,27 @@ public class GameController : MonoBehaviour
 
     public void AddLife()
     {
-
+        CurrentLifeCount ++;
     }
 
     public void RemoveLife()
     {
-
+      CurrentLifeCount --;
     }
 
+    public void ResetLife(){
+      CurrentLifeCount = 3;
+    }
 
+    public void CheckEndGame()
+    {
+      if(CurrentLifeCount >= winCondition)
+        GameEventSystem.FinishGameVariant(true);
+      else
+        if(CurrentLifeCount<= 0 )
+        GameEventSystem.FinishGameVariant(false);
+
+    }
 
     #region CallBacks
 
@@ -239,7 +308,7 @@ public class GameController : MonoBehaviour
     }
 
 
-    public float OnValue_CurrentBarCount()
+    public float OnValue_CurrentLifeCount()
     {
       return CurrentLifeCount;
     }
@@ -264,6 +333,14 @@ public class GameController : MonoBehaviour
         return currentTimeleft;
     }
 
+    public float OnValue_CurrentTimeToResetGame(){
+      return currentTimeToRestartGame;
+    }
+
+    public void OnResetGame()
+    {
+      ResetGame();
+    }
     #endregion
 
 

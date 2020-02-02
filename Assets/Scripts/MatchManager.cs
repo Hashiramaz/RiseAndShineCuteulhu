@@ -46,7 +46,7 @@ namespace Match3
 			GameEventSystem.onReceiveSwapPieceEvent += OnSwapInputReceived;
 			GameEventSystem.onCheckMatch 			+= OnCheckMatch;
 			GameEventSystem.onGameStart += OnStartGame;
-			GameEventSystem.onGameFinish +=OnFinishGame;
+			GameEventSystem.onGameFinishVariant += OnFinishGameVariant;
 			GameEventSystem.onResetDestroyedPieces += OnResetDestroyedPieces;
 			GameEventSystem.onGetCurrentCombo += OnValue_PiecesOnCombo;
 		}
@@ -56,7 +56,7 @@ namespace Match3
 			GameEventSystem.onCheckMatch 			-= OnCheckMatch;
 			
 			GameEventSystem.onGameStart -= OnStartGame;
-			GameEventSystem.onGameFinish -=OnFinishGame;
+			GameEventSystem.onGameFinishVariant -=OnFinishGameVariant;
 			GameEventSystem.onResetDestroyedPieces -= OnResetDestroyedPieces;
 			GameEventSystem.onGetCurrentCombo -= OnValue_PiecesOnCombo;
 			
@@ -415,7 +415,11 @@ public void OnStartGame(){
 	StartGameCreateBoard();
 }
 
-public void OnFinishGame()
+// public void OnFinishGame()
+// {
+// 	FinishGame();
+// }
+public void OnFinishGameVariant(bool value)
 {
 	FinishGame();
 }

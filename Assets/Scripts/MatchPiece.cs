@@ -112,6 +112,7 @@ namespace Match3
 				if (mIsDragging)
 				{
 					CheckDrag(Input.mousePosition);
+					
 				}
 			}
 		}
