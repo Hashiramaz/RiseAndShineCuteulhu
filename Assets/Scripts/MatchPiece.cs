@@ -23,10 +23,12 @@ namespace Match3
 
 		public void Awake()
 		{
-			mBallColorRender = GetComponent<SpriteRenderer>();
+			mBallColorRender = GetComponentInChildren<SpriteRenderer>();
 
 			Explode(0);
 		}
+
+		
 
 		public void SetupPiece(int row, int column, MatchPieceType type, float time)
 		{
@@ -59,6 +61,13 @@ namespace Match3
 			DOTween.Sequence()
 				   .Append(transform.DOScale(0.2f, time))
 				   .Join(mBallColorRender.DOFade(0f, time));
+			
+			if(time > 0)
+			{
+				if(GameEventSystem.GetCurrentGameState() == GameState.INGAME)
+					GameEventSystem.AddScore();
+
+			}
 		}
 
 		public bool HasMatch(MatchesType type)
@@ -116,14 +125,19 @@ namespace Match3
 		{
 			if (!MatchManager.instance.dragMode)
 			{
-				CheckDrag(Input.mousePosition);
+				//CheckDrag(Input.mousePosition);
 			}
 			else
 			{
-				if (MatchManager.instance.canMove)
-					StartCoroutine(MatchManager.instance.CheckForMatches());
+				if (MatchManager.instance.canMove){
+
+					//StartCoroutine(MatchManager.instance.CheckForMatches());
+				}
 				else
-					MatchManager.instance.needCheckMatches = true;
+				{
+
+			//		MatchManager.instance.needCheckMatches = true;
+				}
 			}
 
 			mIsDragging = false;

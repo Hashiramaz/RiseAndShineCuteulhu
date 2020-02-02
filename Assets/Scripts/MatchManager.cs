@@ -18,7 +18,7 @@ namespace Match3
 				return dragMode ? TIME_TO_SWAP_DRAG_MODE : TIME_TO_SWAP;
 			}
 		}
-
+		private bool startedCombo;
 		public static MatchManager instance;
 
 		public bool dragMode;      
@@ -39,19 +39,60 @@ namespace Match3
         private MatchPiece currentPiece;
 		private SwapDirection currentDirection;
 
-		public void Start()
-		{
-			instance = this;
+		public float currentComboTime;
+		public float maxComboTime = 2f;
 
-		    matchPieceObject = (GameObject) Instantiate(Resources.Load("Prefabs/SampleObject"));
-            Vector2 offset = matchPieceObject.GetComponent<SpriteRenderer>().bounds.size;
-			CreateBoard(offset.x, offset.y);
-
-			canMove = true;
-			gameIsOver = false;
+		private void OnEnable() {
+			GameEventSystem.onReceiveSwapPieceEvent += OnSwapInputReceived;
+			GameEventSystem.onCheckMatch 			+= OnCheckMatch;
+			GameEventSystem.onGameStart += OnStartGame;
+			GameEventSystem.onGameFinish +=OnFinishGame;
+			GameEventSystem.onResetDestroyedPieces += OnResetDestroyedPieces;
+			GameEventSystem.onGetCurrentCombo += OnValue_PiecesOnCombo;
 		}
 
-		private void CreateBoard(float xOffset, float yOffset)
+		private void OnDisable() {
+			GameEventSystem.onReceiveSwapPieceEvent -= OnSwapInputReceived;
+			GameEventSystem.onCheckMatch 			-= OnCheckMatch;
+			
+			GameEventSystem.onGameStart -= OnStartGame;
+			GameEventSystem.onGameFinish -=OnFinishGame;
+			GameEventSystem.onResetDestroyedPieces -= OnResetDestroyedPieces;
+			GameEventSystem.onGetCurrentCombo -= OnValue_PiecesOnCombo;
+			
+		}
+
+		public void Start()
+        {
+            instance = this;
+
+           // StartGameCreateBoard();
+        }
+
+		private void Update() 
+		{
+			if(GameEventSystem.GetCurrentGameState() != GameState.INGAME)
+				return;
+
+			currentComboTime += Time.deltaTime;	
+
+			if(currentComboTime > maxComboTime && GameEventSystem.GetCurrentCombo()  >= 0 && startedCombo)
+				GameEventSystem.ResetDestroyedPieces();
+
+		}
+
+        private void StartGameCreateBoard()
+        {
+            matchPieceObject = (GameObject)Instantiate(Resources.Load("Prefabs/SampleObject"));
+            //Vector2 offset = matchPieceObject.GetComponent<SpriteRenderer>().bounds.size;
+            Vector2 offset = matchPieceObject.GetComponent<BoxCollider2D>().bounds.size;
+            CreateBoard(offset.x, offset.y);
+
+            canMove = true;
+            gameIsOver = false;
+        }
+
+        private void CreateBoard(float xOffset, float yOffset)
 		{
 			float startX = transform.position.x;
 			float startY = transform.position.y;
@@ -149,6 +190,8 @@ namespace Match3
 
 		public IEnumerator CheckForMatches(bool needSwapBack = true)
 		{
+			ResetComboTime();
+
 			bool hasMatches = false;
 
 			if (gameIsOver) yield break;
@@ -181,6 +224,8 @@ namespace Match3
 
 		private bool CheckMatches(int x, int y, MatchesType type)
 		{
+			
+
 			var addX = (type == MatchesType.DIAGONAL_LEFT ? -1 : type == MatchesType.VERTICAL ? 0 : 1);
 			var addY = (type == MatchesType.HORIZONTAL ? 0 : 1);
 			var pX = x + addX;
@@ -206,6 +251,9 @@ namespace Match3
 				pieceList.ForEach(p => p.SetMatch(type));
 				ExplodePieces(pieceList);
 				hasMatches = true;
+
+				AddDestroyedPieces(pieceList.Count);
+				
 			}
 
 			return hasMatches;
@@ -213,7 +261,7 @@ namespace Match3
 
 		private IEnumerator ShiftDownPieces()
 		{
-			float offset = matchPieceObject.GetComponent<SpriteRenderer>().bounds.size.y;
+			float offset = matchPieceObject.GetComponent<BoxCollider2D>().bounds.size.y;
 			for (int x = 0; x < rows; x++)
 			{
 				int shifts = 0;
@@ -297,5 +345,96 @@ namespace Match3
 
 			return SwapDirection.NULL;
 		}
+
+		public MatchPiece GetPieceByCoordinates(int collum, int row){
+			return board[collum][row];
+		}
+		
+
+		public void FinishGame()
+		{
+			gameIsOver = true;
+			DestroyAllBlocksRoutine();
+		}
+
+		public void DestroyAllBlocksRoutine()
+		{
+		
+			StartCoroutine(DestroyAllBlocksRoutine(0.04f));
+		}
+
+		IEnumerator DestroyAllBlocksRoutine(float destroyTime)
+		{
+			for (int x = 0; x < rows; x++)
+			{
+				for (int y = 0; y < columns; y++)
+				{
+					board[x][y].Explode(destroyTime);
+					yield return new WaitForSeconds(destroyTime);
+				}
+			}
+		}
+
+		public void StartCheckMatchsRoutine()
+		{
+			StartCoroutine(CheckForMatches(false));
+		}
+
+		public void AddDestroyedPieces(int numToAdd){
+			piecesOnCombo += numToAdd;
+		}
+
+		public void ResetDestroyedPieces()
+		{
+			piecesOnCombo = 0;
+			startedCombo = false;
+		}
+
+		public void ResetComboTime()
+		{
+			currentComboTime = 0;
+			startedCombo = true;
+		}
+
+#region CallBacks
+
+public void OnSwapInputReceived(int collumn, int row, SwapDirection direction)
+{
+	MatchPiece piece = GetPieceByCoordinates(collumn,row);
+
+	SwapPieces(piece,direction,false);
+
+}
+
+public void OnCheckMatch()
+{
+	//StartCheckMatchsRoutine();
+}
+
+public void OnStartGame(){
+	StartGameCreateBoard();
+}
+
+public void OnFinishGame()
+{
+	FinishGame();
+}
+
+public void OnResetDestroyedPieces()
+{
+	GameEventSystem.CheckBarScore();
+	ResetDestroyedPieces();
+}
+public int piecesOnCombo;
+        
+
+        public int OnValue_PiecesOnCombo()
+{
+	return piecesOnCombo;
+}
+
+#endregion
+
+
 	}
 }
