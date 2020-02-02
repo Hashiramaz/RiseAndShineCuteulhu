@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Lean.Gui;
 using UnityEngine;
 
+
 [RequireComponent(typeof(LeanWindow))]
 public class GameWindowController : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class GameWindowController : MonoBehaviour
         if(!leanWindow.On && GameEventSystem.GetCurrentGameState() != GameState.MENU)
         {
             leanWindow.TurnOn();
+            
         }
         
         if(leanWindow.On && GameEventSystem.GetCurrentGameState() == GameState.MENU)

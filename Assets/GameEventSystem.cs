@@ -7,6 +7,7 @@ public class GameEventSystem : MonoBehaviour
         public delegate void GameEvent();
         public delegate void GameBoolEvent(bool value);
         public delegate void GameEventPassIntValue(int value);
+        public delegate void GameEventValidMessage(string user, string message);
         public delegate float GameFloatValue();
         public delegate int GameIntValue();
         public delegate bool GameBoolValue();
@@ -101,6 +102,7 @@ public class GameEventSystem : MonoBehaviour
                 return 0;
         } 
 
+
         public static event GameSwapPieceEvent onReceiveSwapPieceEvent;
 
         public static void SwapPieces(int collumn, int row, SwapDirection direction)
@@ -110,7 +112,15 @@ public class GameEventSystem : MonoBehaviour
                 onReceiveSwapPieceEvent(collumn,row,direction);
             }
         }
+        public static event GameEventValidMessage onReceiveMessageValidEvent;
 
+        public static void MessageValid(string user, string message)
+        {
+            if(onReceiveMessageValidEvent != null)
+            {
+                onReceiveMessageValidEvent(user,message);
+            }
+        }
         public static event GameEvent onCheckMatch;
 
         public static void CheckMatch(){
@@ -191,7 +201,7 @@ public class GameEventSystem : MonoBehaviour
 
         public static float GetCurrentTimeToRestartGame(){
             if(onGetCurrentTimeToRestartGame != null)
-                return GetCurrentTimeToRestartGame();
+                return onGetCurrentTimeToRestartGame();
             else 
                 return 0f;
         }

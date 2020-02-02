@@ -22,9 +22,9 @@ public class RestartTimeText : MonoBehaviour
     private void Update() {
         
        
-            _currentResetTimeLeft = GameEventSystem.GetCurrentTimeToRestartGame();
+           // _currentResetTimeLeft = GameEventSystem.GetCurrentTimeToRestartGame().ToString();
             
-            ResetTimeLeftText.text =Mathf.Round(_currentResetTimeLeft).ToString();
+            ResetTimeLeftText.text = Mathf.Round(GameEventSystem.GetCurrentTimeToRestartGame()).ToString();
         
     }
     

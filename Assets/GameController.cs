@@ -201,17 +201,17 @@ public class GameController : MonoBehaviour
     public void CheckBarScore()
     {
      // StartCoroutine(CheckBarRoutine());
-     if(GameEventSystem.GetCurrentCombo() > minPiecesToDestroy){
-       GameEventSystem.GreatCombo();
+     if(GameEventSystem.GetCurrentCombo() >= minPiecesToDestroy){
         Debug.Log("MANDOU BEM!");
         AddPieceLevel();
         AddLife();
+       GameEventSystem.GreatCombo();
       //  CheckEndGame();
      }
       else{
-        GameEventSystem.BadCombo();
         Debug.Log("MANDOU MAL =(");
         RemoveLife();
+        GameEventSystem.BadCombo();
       }
 
       CheckEndGame();

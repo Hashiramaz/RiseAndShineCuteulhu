@@ -40,17 +40,24 @@ public class TwitchChatMessageReceiver : MonoBehaviour
 
         //add new message.
         //CreateUIMessage(user, msgString);
-        ParseInputEvent(msgString);
+        ParseInputEvent(msg);
     }
 
     public void ParseInputEvent(string msg)
     {
-        if(!ValidadeMsg(msg))
+
+        int msgIndex = msg.IndexOf("PRIVMSG #");
+        string msgString = msg.Substring(msgIndex + IRC.channelName.Length + 11);
+        string user = msg.Substring(1, msg.IndexOf('!') - 1);
+
+
+
+        if(!ValidadeMsg(msgString))
             return;
 
-        string collum = msg.Substring(0, 1);
-        string row = msg.Substring(1, 1);
-        string direction = msg.Substring(2, 1);
+        string collum = msgString.Substring(0, 1);
+        string row = msgString.Substring(1, 1);
+        string direction = msgString.Substring(2, 1);
 
         int rowInt = GetIntRow(row);
         int collumInt = GetIntCollum(collum);
@@ -66,6 +73,8 @@ public class TwitchChatMessageReceiver : MonoBehaviour
         Debug.Log("Row: " + rowInt + "Collum: " + collumInt + "Direction: " + directionEnum);
 
         GameEventSystem.SwapPieces(collumInt, rowInt, directionEnum);
+
+        GameEventSystem.MessageValid(user,msgString);
     }
 
     public int GetIntRow(string rowstring)
