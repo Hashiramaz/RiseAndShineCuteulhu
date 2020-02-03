@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour
     public int minPiecesToDestroy = 5;
 
     public float currentTimeToRestartGame = 10f;
+
+    public float maxTimeToResetGame = 15f;
     private void OnEnable()
     {
         GameEventSystem.onAddScore += OnAddScore;
@@ -190,7 +192,7 @@ public class GameController : MonoBehaviour
 
     public void ResetTimeToRestartGame()
     {
-      currentTimeToRestartGame = 10;
+      currentTimeToRestartGame = maxTimeToResetGame;
     }
 
     public void CheckMatchs()
